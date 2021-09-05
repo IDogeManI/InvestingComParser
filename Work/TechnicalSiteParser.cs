@@ -7,7 +7,7 @@ namespace TESTERforWNDFORMS
 {
     static class TechnicalSiteParser
     {
-        public static string GetPage (string link = "https://ru.investing.com/crypto/ethereum/eth-usd-technical",string period = "18000", string PairID = "1058142")
+    public static string GetPage (string link = "https://ru.investing.com/crypto/ethereum/eth-usd-technical",string period = "18000", string PairID = "1058142")
         {
             try
             {
@@ -50,23 +50,31 @@ namespace TESTERforWNDFORMS
         }
     public static void ParsTover (string response, out string[] AvgPlusTech,out string Sum)
         {
-            if(response!= null)
+            try
             {
-                HtmlParser htmlParser = new HtmlParser();
-                var Doc = htmlParser.ParseDocument(response);
-                List<string> AvgSklonAndTechInd = new List<string>();
-                foreach(var item in Doc.QuerySelectorAll("div.summaryTableLine"))
+                if(response != null)
                 {
-                    foreach(var InnerItem in item.QuerySelectorAll("span"))
+                    HtmlParser htmlParser = new HtmlParser();
+                    var Doc = htmlParser.ParseDocument(response);
+                    List<string> AvgSklonAndTechInd = new List<string>();
+                    foreach(var item in Doc.QuerySelectorAll("div.summaryTableLine"))
                     {
-                        AvgSklonAndTechInd.Add(InnerItem.TextContent);
+                        foreach(var InnerItem in item.QuerySelectorAll("span"))
+                        {
+                            AvgSklonAndTechInd.Add(InnerItem.TextContent);
+                        }
                     }
-                }
 
-                Sum = Doc.QuerySelector("div.summary>span").TextContent;
-                AvgPlusTech = AvgSklonAndTechInd.ToArray();
+                    Sum = Doc.QuerySelector("div.summary>span").TextContent;
+                    AvgPlusTech = AvgSklonAndTechInd.ToArray();
+                }
+                else
+                {
+                    Sum = null;
+                    AvgPlusTech = null;
+                }
             }
-            else
+            catch
             {
                 Sum = null;
                 AvgPlusTech = null;
@@ -75,18 +83,25 @@ namespace TESTERforWNDFORMS
        }
     public static List<string> ParsPivot(string response)
         {
-            if(response != null)
+            try
             {
-                HtmlParser htmlParser = new HtmlParser();
-                var Doc = htmlParser.ParseDocument(response);
-                List<string> ClassicPivot = new List<string>();
-                foreach(var item in Doc.QuerySelectorAll("tbody>tr"))
+                if(response != null)
                 {
-                    ClassicPivot.Add(item.TextContent);
+                    HtmlParser htmlParser = new HtmlParser();
+                    var Doc = htmlParser.ParseDocument(response);
+                    List<string> ClassicPivot = new List<string>();
+                    foreach(var item in Doc.QuerySelectorAll("tbody>tr"))
+                    {
+                        ClassicPivot.Add(item.TextContent);
+                    }
+                    return ClassicPivot[0].Split('\n').Where(x => x != "").Where(x => x[0] != 'К').ToList();
                 }
-                return ClassicPivot[0].Split('\n').Where(x=>x!="").Where(x=>x[0]!='К').ToList();
+                else
+                {
+                    return null;
+                }
             }
-            else
+            catch
             {
                 return null;
             }

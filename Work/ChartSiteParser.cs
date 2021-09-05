@@ -45,38 +45,47 @@ namespace TESTERforWNDFORMS
         }
         public static void ParsTover (string response,int pair_interval_Lenth, int PairID_Lenth, out string CourseForNow, out List<double> AvgCandles)
         {
-            if(response!= null)
+            try
             {
-                List<string> NotSplitCandles = new List<string>();
+                if(response != null)
+                {
+                    List<string> NotSplitCandles = new List<string>();
 
-                NotSplitCandles = response.Substring(60 + pair_interval_Lenth + PairID_Lenth).Split(']').Where(x=>x!="").Where(x=>x[0]=='['||(x[0] ==','&&x[1] == '[')).ToList();
-                NotSplitCandles.AsParallel().ForAll(x =>
-                {
-                    NotSplitCandles[NotSplitCandles.FindIndex(z => z == x)] = x.Substring(x.IndexOf('[') + 1);
-                });
-                List<string>[] AllCandles = new List<string>[NotSplitCandles.Count];
-                Enumerable.Range(0 , NotSplitCandles.Count).AsParallel().ForAll(x =>
-                {
-                    AllCandles[x] = NotSplitCandles[x].Split(',').ToList();
-                });
-                CourseForNow = AllCandles[NotSplitCandles.Count-1][4];
-                List<double> CandlesAvg = new List<double>();
-                for(int i = 0; i < NotSplitCandles.Count; i++)
-                {
-                    CandlesAvg.Add((double.Parse(AllCandles[i][2] , System.Globalization.CultureInfo.InvariantCulture)
-                        + double.Parse(AllCandles[i][3] , System.Globalization.CultureInfo.InvariantCulture)) / 2);
+                    NotSplitCandles = response.Substring(60 + pair_interval_Lenth + PairID_Lenth).Split(']').Where(x => x != "").Where(x => x[0] == '[' || (x[0] == ',' && x[1] == '[')).ToList();
+                    NotSplitCandles.AsParallel().ForAll(x =>
+                    {
+                        NotSplitCandles[NotSplitCandles.FindIndex(z => z == x)] = x.Substring(x.IndexOf('[') + 1);
+                    });
+                    List<string>[] AllCandles = new List<string>[NotSplitCandles.Count];
+                    Enumerable.Range(0 , NotSplitCandles.Count).AsParallel().ForAll(x =>
+                    {
+                        AllCandles[x] = NotSplitCandles[x].Split(',').ToList();
+                    });
+                    CourseForNow = AllCandles[NotSplitCandles.Count - 1][4];
+                    List<double> CandlesAvg = new List<double>();
+                    for(int i = 0; i < NotSplitCandles.Count; i++)
+                    {
+                        CandlesAvg.Add((double.Parse(AllCandles[i][2] , System.Globalization.CultureInfo.InvariantCulture)
+                            + double.Parse(AllCandles[i][3] , System.Globalization.CultureInfo.InvariantCulture)) / 2);
+                    }
+                    Enumerable.Range(0 , CandlesAvg.Count).AsParallel().ForAll(x =>
+                    {
+                        CandlesAvg[x] = CandlesAvg[x] * -1;
+                    });
+                    AvgCandles = CandlesAvg;
                 }
-                Enumerable.Range(0 , CandlesAvg.Count).AsParallel().ForAll(x =>
+                else
                 {
-                    CandlesAvg[x] = CandlesAvg[x] * -1;
-                });
-                AvgCandles = CandlesAvg;
+                    CourseForNow = null;
+                    AvgCandles = null;
+                }
             }
-            else
+            catch
             {
                 CourseForNow = null;
                 AvgCandles = null;
             }
+            
         }
     }
 }

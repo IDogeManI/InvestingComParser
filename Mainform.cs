@@ -15,29 +15,56 @@ namespace TESTERforWNDFORMS
         {
             InitializeComponent();
         }
-
         private void StartButton_Click (object sender , EventArgs e)
         {
+            TelegramBot.link = Log.Text;
+            TelegramBot.pairID = aPairID.Text;
+            TelegramBot.InisaliaseBot();
+            SetBeforeCourseAsNow();
             if(!Timer.Enabled)
             {
                 Timer.Start();
             }
             Refill();
         }
-        private async void Refill ()
+        private void StopButton_Click (object sender , EventArgs e)
         {
-            await Task.Run(() =>
+            if(Timer.Enabled)
             {
-                StartButton.Enabled = false;
-                Log.Enabled = false;
-                aPairID.Enabled = false;
-
-                Graphici();
-                FillingGropBoxes();
-                FillingPivot();
-            });
+                Timer.Stop();
+            }
+            ItsTimeToStop.TimeToStop = 0;
+            StartButton.Enabled = true;
         }
-
+        private void Timer_Tick (object sender , EventArgs e)
+        {
+            ItsTimeToStop.TimeToStop += 1;
+            try
+            {
+                if(ItsTimeToStop.TimeToStop % 600 == 0)
+                {
+                    Refill();
+                    ItsTimeToStop.TimeToStop = 0;
+                }
+                if(ItsTimeToStop.TimeToStop % 5 == 0)
+                {
+                    NowCourseSetter();
+                    if(ItsTimeToStop.ThisNowCourse >= ItsTimeToStop.BeforeCourse + ItsTimeToStop.BeforeCourse / 100 * 1)
+                    {
+                        TelegramBot.SendPlusPersent();
+                        SetBeforeCourseAsNow();
+                    }
+                    if(ItsTimeToStop.ThisNowCourse <= ItsTimeToStop.BeforeCourse - ItsTimeToStop.BeforeCourse / 100 * 1)
+                    {
+                        TelegramBot.SendMinusPersent();
+                        SetBeforeCourseAsNow();
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
         #region String To Fill GroupBox
         private void StringToFillGroupBox
             (string Sum , Label ToSum ,
@@ -48,13 +75,19 @@ namespace TESTERforWNDFORMS
              string TechBuy , Label ToTechBuy ,
              string TechSell , Label ToTechSell)
         {
-                    ToSum.Text = Sum;
-                    ToAvg.Text = Avg;
-                    ToAvgBuy.Text = AvgBuy;
-                    ToAvgSell.Text = AvgSell;
-                    ToTech.Text = Tech;
-                    ToTechBuy.Text = TechBuy;
-                    ToTechSell.Text = TechSell;
+            try
+            {
+                ToSum.Text = Sum;
+                ToAvg.Text = Avg;
+                ToAvgBuy.Text = AvgBuy;
+                ToAvgSell.Text = AvgSell;
+                ToTech.Text = Tech;
+                ToTechBuy.Text = TechBuy;
+                ToTechSell.Text = TechSell;
+            }
+            catch
+            {
+            }
         }
         #endregion
         private void FillingGropBoxes ()
@@ -102,7 +135,6 @@ namespace TESTERforWNDFORMS
 
                 }
         }
-
         # region StringToFillPivot
         private void StringToFillPivot
             (string S3 , Label ToS3 ,
@@ -113,13 +145,19 @@ namespace TESTERforWNDFORMS
              string R2 , Label ToR2 ,
              string R3 , Label ToR3)
         {
-            ToS3.Text = S3;
-            ToS2.Text = S2;
-            ToS1.Text = S1;
-            ToR1.Text = R1;
-            ToR2.Text = R2;
-            ToR3.Text = R3;
-            ToPiv.Text = Piv;
+            try
+            {
+                ToS3.Text = S3;
+                ToS2.Text = S2;
+                ToS1.Text = S1;
+                ToR1.Text = R1;
+                ToR2.Text = R2;
+                ToR3.Text = R3;
+                ToPiv.Text = Piv;
+            }
+            catch
+            {
+            }
         }
         #endregion
         private void FillingPivot ()
@@ -165,190 +203,184 @@ namespace TESTERforWNDFORMS
 
                 }
         }
-
-        private void StopButton_Click (object sender , EventArgs e)
-        {
-            if(Timer.Enabled)
-            {
-                Timer.Stop();
-            }
-            ItsTimeToStop.TimeToStop = 0;
-            StartButton.Enabled = true;
-        }
-
         private void Graphici ()
         {
-                try
+            try
+            {
+                string link = Log.Text;
+                string PairID = aPairID.Text;
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FiveMin , PairID) , Period.FiveMin.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
                 {
-                    string link = Log.Text;
-                    string PairID = aPairID.Text;
-                    Parallel.Invoke(
-                    () =>
+                    Bitmap AvgLine = new Bitmap(PictureBox5min.Width , PictureBox5min.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
                     {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FiveMin , PairID) , Period.FiveMin.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox5min.Width , PictureBox5min.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox5min.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FefteenMin , PairID) , Period.FefteenMin.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox15min.Width , PictureBox15min.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox15min.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FirtyMin , PairID) , Period.FirtyMin.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox30min.Width , PictureBox30min.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox30min.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneHour , PairID) , Period.OneHour.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox1h.Width , PictureBox1h.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox1h.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FiveHours , PairID) , Period.FiveHours.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox5h.Width , PictureBox5h.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox5h.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneDay , PairID) , Period.OneDay.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox1d.Width , PictureBox1d.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox1d.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneWeek , PairID) , Period.OneWeek.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox1ned.Width , PictureBox1ned.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox1ned.Image = AvgLine;
-                        }
-                    } ,
-                    () =>
-                    {
-                        ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneMonth , PairID) , Period.OneMonth.Length , PairID.Length , out string ThisNowCourse , out List<double> CandlesAvg);
-                        if(ThisNowCourse != null && CandlesAvg != null)
-                        {
-                            Bitmap AvgLine = new Bitmap(PictureBox1m.Width , PictureBox1m.Height);
-                            Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
-                            Pen pen = new Pen(Color.Black);
-                            for(int i = 0; i < CandlesAvg.Count - 1; i++)
-                            {
-                                PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
-                                NeposredstvennoLine.DrawLine(pen , First , Second);
-                            }
-                            PictureBox1m.Image = AvgLine;
-                        }
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
                     }
-                    );
-
+                    PictureBox5min.Image = AvgLine;
                 }
-                catch
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FefteenMin , PairID) , Period.FefteenMin.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
                 {
+                    Bitmap AvgLine = new Bitmap(PictureBox15min.Width , PictureBox15min.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox15min.Image = AvgLine;
                 }
-        }
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FirtyMin , PairID) , Period.FirtyMin.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox30min.Width , PictureBox30min.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox30min.Image = AvgLine;
+                }
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneHour , PairID) , Period.OneHour.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox1h.Width , PictureBox1h.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox1h.Image = AvgLine;
+                }
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.FiveHours , PairID) , Period.FiveHours.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox5h.Width , PictureBox5h.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox5h.Image = AvgLine;
+                }
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneDay , PairID) , Period.OneDay.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox1d.Width , PictureBox1d.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox1d.Image = AvgLine;
+                }
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneWeek , PairID) , Period.OneWeek.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox1ned.Width , PictureBox1ned.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox1ned.Image = AvgLine;
+                }
 
+                ChartSiteParser.ParsTover(ChartSiteParser.GetPage(link , Period.OneMonth , PairID) , Period.OneMonth.Length , PairID.Length , out ThisNowCourse , out CandlesAvg);
+                if(ThisNowCourse != null && CandlesAvg != null)
+                {
+                    Bitmap AvgLine = new Bitmap(PictureBox1m.Width , PictureBox1m.Height);
+                    Graphics NeposredstvennoLine = Graphics.FromImage(AvgLine);
+                    Pen pen = new Pen(Color.Black);
+                    for(int i = 0; i < CandlesAvg.Count - 1; i++)
+                    {
+                        PointF First = new PointF(float.Parse((i * 5).ToString()) , float.Parse(((CandlesAvg[i] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        PointF Second = new PointF(float.Parse(((i + 1) * 5).ToString()) , float.Parse(((CandlesAvg[i + 1] - CandlesAvg.Min()) * 86 / (CandlesAvg.Max() - CandlesAvg.Min())).ToString()));
+                        NeposredstvennoLine.DrawLine(pen , First , Second);
+                    }
+                    PictureBox1m.Image = AvgLine;
+                }
+            }
+            catch
+            {
+            }
+                    
+        }
+        private async void Refill ()
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    StartButton.Enabled = false;
+                    Log.Enabled = false;
+                    aPairID.Enabled = false;
+
+                    Graphici();
+                    FillingGropBoxes();
+                    FillingPivot();
+                });
+            }
+            catch
+            {
+            }
+        }
         private async void NowCourseSetter ()
         {
-            await Task.Run(() =>
+            try
+            {
+                await Task.Run(() =>
+                {
+                    ChartSiteParser.ParsTover(ChartSiteParser.GetPage(Log.Text , Period.FiveMin , aPairID.Text) , Period.FiveMin.Length , aPairID.Text.Length , out string ThisNowCourse , out List<double> CandlesAvg);
+                    if(ThisNowCourse != null)
+                    {
+                        NowCourse.Text = ThisNowCourse;
+                        ItsTimeToStop.ThisNowCourse = double.Parse(ThisNowCourse , System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                });
+            }
+            catch
+            {
+            }
+        }
+
+        private void SetBeforeCourseAsNow ()
+        {
+            try
             {
                 ChartSiteParser.ParsTover(ChartSiteParser.GetPage(Log.Text , Period.FiveMin , aPairID.Text) , Period.FiveMin.Length , aPairID.Text.Length , out string ThisNowCourse , out List<double> CandlesAvg);
                 if(ThisNowCourse != null)
-                    NowCourse.Text = ThisNowCourse;
-            });
+                {
+                    ItsTimeToStop.BeforeCourse = double.Parse(ThisNowCourse , System.Globalization.CultureInfo.InvariantCulture);
+                }
+            }
+            catch
+            {
+            }
         }
 
-        private void Timer_Tick (object sender , EventArgs e)
-        {
-            ItsTimeToStop.TimeToStop += 1;
-            if(ItsTimeToStop.TimeToStop % 607 == 0)
-            {
-                Refill();
-            }
-            if(ItsTimeToStop.TimeToStop % 5 == 0)
-            {
-                NowCourseSetter();
-            }
-        }
         
     }
 }
