@@ -113,12 +113,12 @@ namespace TESTERforWNDFORMS
                 Label[] TechBuy = { TechBuy5min , TechBuy15min , TechBuy30min , TechBuy1h , TechBuy5h , TechBuy1d , TechBuy1ned , TechBuy1m };
                 Label[] TechSell = { TechSell5min , TechSell15min , TechSell30min , TechSell1h , TechSell5h , TechSell1d , TechSell1ned , TechSell1m };
 
-                Enumerable.Range(0 , 8).AsParallel().ForAll(x =>
+                for(int x = 0; x < 8; x++) 
                 {
                     TechnicalSiteParser.ParsTover(TechnicalSiteParser.GetPage(link , Per[x] , pairID) , out string[] parsing , out string sum);
                     if(parsing != null && sum != null)
                         StringToFillGroupBox(sum , Sum[x] , parsing[1] , Avg[x] , parsing[2] , AvgBuy[x] , parsing[3] , AvgSell[x] , parsing[5] , Tech[x] , parsing[6] , TechBuy[x] , parsing[7] , TechSell[x]);
-                });
+                }
             }
             catch
             {
