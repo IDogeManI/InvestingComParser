@@ -62,8 +62,6 @@ namespace TESTERforWNDFORMS
         {
             try
             {
-                //await Task.Run(() =>
-                //{
                     var Msg = e.Message;
                     string text = "";
                     TechnicalSiteParser.ParsTover(TechnicalSiteParser.GetPage(link , Period.FiveMin , pairID) , out string[] parsing , out string sum);
@@ -98,8 +96,7 @@ namespace TESTERforWNDFORMS
                     TechnicalSiteParser.ParsTover(TechnicalSiteParser.GetPage(link , Period.OneMonth , pairID) , out parsing , out sum);
                     if(parsing != null && sum != null)
                         text += "1 месяц: " + sum + "\r\n";
-                    Client.SendTextMessageAsync(Msg.Chat.Id , text , replyMarkup: GetButtons());
-                //});
+                    await Client.SendTextMessageAsync(Msg.Chat.Id , text , replyMarkup: GetButtons());
             }
             catch
             {
@@ -131,6 +128,12 @@ namespace TESTERforWNDFORMS
             catch
             {
             }
+        }
+
+        [Obsolete]
+        public static void StopReciving()
+        {
+            Client.StopReceiving();
         }
 
 

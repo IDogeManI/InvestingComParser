@@ -2,6 +2,7 @@
 {
     static class Period
     {
+
         public static string FiveMin { get; } = "300";
         public static string FefteenMin { get; } = "900";
         public static string FirtyMin { get; } = "1800";
