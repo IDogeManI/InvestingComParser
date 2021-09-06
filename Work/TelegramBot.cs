@@ -62,8 +62,8 @@ namespace TESTERforWNDFORMS
         {
             try
             {
-                await Task.Run(() =>
-                {
+                //await Task.Run(() =>
+                //{
                     var Msg = e.Message;
                     string text = "";
                     TechnicalSiteParser.ParsTover(TechnicalSiteParser.GetPage(link , Period.FiveMin , pairID) , out string[] parsing , out string sum);
@@ -99,7 +99,7 @@ namespace TESTERforWNDFORMS
                     if(parsing != null && sum != null)
                         text += "1 месяц: " + sum + "\r\n";
                     Client.SendTextMessageAsync(Msg.Chat.Id , text , replyMarkup: GetButtons());
-                });
+                //});
             }
             catch
             {
