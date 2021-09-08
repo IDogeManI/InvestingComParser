@@ -1977,6 +1977,7 @@ namespace TESTERforWNDFORMS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1513, 796);
             this.Controls.Add(this.R31mClassic);
@@ -2067,8 +2068,8 @@ namespace TESTERforWNDFORMS
             this.Controls.Add(this.StartButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "Mainform";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mainform";
             this.DaygroupBox.ResumeLayout(false);
             this.DaygroupBox.PerformLayout();
