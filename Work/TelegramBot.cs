@@ -44,6 +44,7 @@ namespace TESTERforWNDFORMS
                     {
                         case "Refresh":
                             SendAllTechInfo(e);
+                            
                             break;
 
 
@@ -129,7 +130,77 @@ namespace TESTERforWNDFORMS
             {
             }
         }
+        private static List<string>[] PrevVs = new List<string>[5];
+        public static async void SendCMToTB (List<string>[] vs)
+        {
+            try
+            {
+                if(ChatID != 0)
+                {
+                    if(!Sravnenie(vs))
+                    {
+                        foreach(var InerHtm in vs)
+                        {
+                            if(InerHtm!= null)
+                            {
+                                await Client.SendTextMessageAsync(ChatID , InerHtm[0].ToString() + '\n' + InerHtm[1].ToString() + '\n' + InerHtm[2].ToString() + '\n' + InerHtm[3].ToString() + '\n' + InerHtm[4].ToString() , replyMarkup: GetButtons());
+                            }
+                        }
+                        await Client.SendTextMessageAsync(ChatID , "===============" , replyMarkup: GetButtons());
+                        for(int i = 0; i < PrevVs.Length; i++)
+                        {
+                             PrevVs[i]=vs[i];
+                        }
+                    }
 
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        private static  bool Sravnenie(List<string>[] now)
+        {
+            if(PrevVs.Length == now.Length)
+            {
+                int g = 0;
+                for(int i = 0; i < PrevVs.Length; i++)
+                {
+                    int great = 0;
+                    for(int j = 0; j < 5; j++)
+                    {
+                        if(PrevVs[i]!=null&&now[i]!=null)
+                        {
+                            if(PrevVs[i][j] == now[i][j])
+                            {
+                                great++;
+                            }
+                        }
+                    }
+                    if(great == 5)
+                    {
+                        g++;
+                    }
+                    else if(PrevVs[i] == null&& now[i] == null)
+                    {
+                        g++;
+                    }
+                }
+                if(g == PrevVs.Length)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
         [Obsolete]
         public static void StopReciving()
         {

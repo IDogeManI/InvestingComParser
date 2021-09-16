@@ -30,6 +30,7 @@ namespace TESTERforWNDFORMS
         private void InitializeComponent ()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Mainform));
             this.StartButton = new System.Windows.Forms.Button();
             this.Log = new System.Windows.Forms.RichTextBox();
             this.OnlyReadResume5min = new System.Windows.Forms.Label();
@@ -205,6 +206,9 @@ namespace TESTERforWNDFORMS
             this.R11mClassic = new System.Windows.Forms.Label();
             this.R21mClassic = new System.Windows.Forms.Label();
             this.R31mClassic = new System.Windows.Forms.Label();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.закрытьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DaygroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -221,6 +225,7 @@ namespace TESTERforWNDFORMS
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1d)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1ned)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1m)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // StartButton
@@ -1973,6 +1978,27 @@ namespace TESTERforWNDFORMS
             this.R31mClassic.TabIndex = 16;
             this.R31mClassic.Text = "3.256,86";
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.закрытьToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(119, 26);
+            // 
+            // закрытьToolStripMenuItem
+            // 
+            this.закрытьToolStripMenuItem.Name = "закрытьToolStripMenuItem";
+            this.закрытьToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.закрытьToolStripMenuItem.Text = "Закрыть";
+            this.закрытьToolStripMenuItem.Click += new System.EventHandler(this.закрытьToolStripMenuItem_Click);
+            // 
             // Mainform
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2067,10 +2093,13 @@ namespace TESTERforWNDFORMS
             this.Controls.Add(this.aPairID);
             this.Controls.Add(this.StartButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Mainform";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mainform";
+            this.Load += new System.EventHandler(this.Mainform_Load);
+            this.Resize += new System.EventHandler(this.Mainform_Resize);
             this.DaygroupBox.ResumeLayout(false);
             this.DaygroupBox.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -2095,6 +2124,7 @@ namespace TESTERforWNDFORMS
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1d)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1ned)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox1m)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2277,5 +2307,8 @@ namespace TESTERforWNDFORMS
         private System.Windows.Forms.Label R11mClassic;
         private System.Windows.Forms.Label R21mClassic;
         private System.Windows.Forms.Label R31mClassic;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem закрытьToolStripMenuItem;
     }
 }

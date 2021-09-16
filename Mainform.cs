@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using TESTERforWNDFORMS.Properties;
 
 namespace TESTERforWNDFORMS
 {
@@ -15,15 +16,42 @@ namespace TESTERforWNDFORMS
         {
             InitializeComponent();
         }
-
+        private void Mainform_Load (object sender , EventArgs e)
+        {
+            notifyIcon1.BalloonTipTitle = "INVP";
+            notifyIcon1.BalloonTipText = "InvestingComParser";
+            notifyIcon1.Text = "InvestingComParser";
+        }
+        private void Mainform_Resize (object sender , EventArgs e)
+        {
+            if(WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+                notifyIcon1.Visible = true;
+                notifyIcon1.ShowBalloonTip(1000);
+            }
+            else if(FormWindowState.Normal == this.WindowState)
+            { notifyIcon1.Visible = false; }
+        }
+        private void notifyIcon1_MouseDoubleClick (object sender , MouseEventArgs e)
+        {
+            Show();
+            notifyIcon1.Visible = false;
+            WindowState = FormWindowState.Normal;
+        }
+        private void закрытьToolStripMenuItem_Click (object sender , EventArgs e)
+        {
+            Close();
+        }
         [Obsolete]
         private void StartButton_Click (object sender , EventArgs e)
         {
             TelegramBot.link = Log.Text;
             TelegramBot.pairID = aPairID.Text;
             TelegramBot.InisaliaseBot();
-            SetBeforeCourseAsNow();
 
+            SetBeforeCourseAsNow();
+            SendCandleMToTB();
 
             if(!Timer.Enabled)
             {
@@ -50,8 +78,12 @@ namespace TESTERforWNDFORMS
                 if(ItsTimeToStop.TimeToStop % 600 == 0)
                 {
                     Refill();
-                    ItsTimeToStop.TimeToStop = 0;
                 }
+                if(ItsTimeToStop.TimeToStop % 100 == 0)
+                {
+                    SendCandleMToTB();
+                }
+
                 if(ItsTimeToStop.TimeToStop % 5 == 0)
                 {
                     NowCourseSetter();
@@ -70,6 +102,14 @@ namespace TESTERforWNDFORMS
             }
             catch
             {
+            }
+        }
+        private static void SendCandleMToTB ()
+        {
+            var Nenull = CandleModelParser.ParsTover(CandleModelParser.GetPage());
+            if(Nenull != null)
+            {
+                TelegramBot.SendCMToTB(Nenull);
             }
         }
         #region String To Fill GroupBox
@@ -261,6 +301,8 @@ namespace TESTERforWNDFORMS
             {
             }
         }
+
+
 
 
     }

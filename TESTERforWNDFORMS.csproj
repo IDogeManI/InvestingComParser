@@ -79,6 +79,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Work\CandleModelParser.cs" />
     <Compile Include="Work\ChartSiteParser.cs" />
     <Compile Include="Work\TelegramBot.cs" />
     <Compile Include="Work\ItsTimeToStop.cs" />
